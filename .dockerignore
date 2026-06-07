@@ -2,6 +2,7 @@ node_modules
 dist
 .env
 subscribers.json
+state.json
 .git
 .gitignore
 README.md

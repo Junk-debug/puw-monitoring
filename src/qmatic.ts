@@ -1,4 +1,5 @@
 import { config } from "./config.js";
+import { getState } from "./state.js";
 
 export interface TimeSlot {
   date: string; // YYYY-MM-DD
@@ -12,12 +13,15 @@ const commonHeaders = {
 };
 
 // Qmatic uses matrix params (;key=value) on the path segment.
+// branch/service are read from runtime state so /setbranch & /setservice take effect live.
 function datesUrl(): string {
-  return `${config.base}/rest/schedule/branches/${config.branchId}/dates;servicePublicId=${config.serviceId};customSlotLength=${config.customSlotLength}`;
+  const { branchId, serviceId } = getState();
+  return `${config.base}/rest/schedule/branches/${branchId}/dates;servicePublicId=${serviceId};customSlotLength=${config.customSlotLength}`;
 }
 
 function timesUrl(date: string): string {
-  return `${config.base}/rest/schedule/branches/${config.branchId}/dates/${date}/times;servicePublicId=${config.serviceId};customSlotLength=${config.customSlotLength}`;
+  const { branchId, serviceId } = getState();
+  return `${config.base}/rest/schedule/branches/${branchId}/dates/${date}/times;servicePublicId=${serviceId};customSlotLength=${config.customSlotLength}`;
 }
 
 async function getJson(url: string): Promise<unknown> {

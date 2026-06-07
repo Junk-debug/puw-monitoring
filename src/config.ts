@@ -11,8 +11,11 @@ function required(name: string): string {
   return v;
 }
 
+const ownerRaw = process.env.OWNER_CHAT_ID;
+
 export const config = {
   botToken: required("BOT_TOKEN"),
+  ownerId: ownerRaw ? Number(ownerRaw) : undefined,
   pollIntervalSec: Number(process.env.POLL_INTERVAL_SEC ?? 60),
   base: process.env.PUW_BASE ?? "https://rezerwacja.gdansk.uw.gov.pl:8445/qmaticwebbooking",
   branchId: process.env.BRANCH_ID ?? "1cf1e3e60eeb96dae2bb572487249bd48cc5bed0024960eaee0c893ce4918569",
