@@ -8,7 +8,7 @@ import {
   setActive,
   setBranch,
   setService,
-  resetAll,
+  forgetSeen,
   getSeen,
   markSeen,
 } from "./state.js";
@@ -156,13 +156,11 @@ bot.command("setservice", async (ctx) => {
 });
 
 bot.command("reset", async (ctx) => {
-  resetAll();
-  const st = getState();
+  forgetSeen();
   await ctx.reply(
-    "♻️ Stan zresetowany do domyślnych.\n\n" +
-      `Branch: …${st.branchId.slice(-8)}\n` +
-      `Service: …${st.serviceId.slice(-8)}\n` +
-      "Powiadomienia: włączone ✅",
+    "♻️ Pamięć wyczyszczona. Przy najbliższym sprawdzeniu (do 60s) dostaniesz " +
+      "powiadomienie o wszystkich aktualnie dostępnych terminach — dobre do testu.\n\n" +
+      "Ustawienia (branch/service) bez zmian.",
   );
 });
 

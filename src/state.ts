@@ -105,12 +105,14 @@ export function resetBaseline(): void {
   persist();
 }
 
-/** Reset everything to defaults. Keeps ownerId so the bot stays claimed. */
-export function resetAll(): void {
-  state.branchId = config.branchId;
-  state.serviceId = config.serviceId;
-  state.active = true;
-  state.initialized = false;
+/**
+ * Forget the notification memory so the NEXT poll re-notifies about all
+ * currently-available dates (handy for testing). Keeps settings & owner.
+ * Stays `initialized` (unlike resetBaseline) so the next poll notifies, not seeds.
+ */
+export function forgetSeen(): void {
   state.seenDates = [];
+  state.initialized = true;
+  state.active = true;
   persist();
 }
