@@ -190,8 +190,19 @@ async function main(): Promise<void> {
   setInterval(poll, Math.max(30, config.pollIntervalSec) * 1000);
   void poll(); // seed baseline immediately instead of waiting one interval
 
-  bot.start();
-  console.log("Bot started.");
+  startBotWithRetry();
+}
+
+// getUpdates can fail with 409 during a redeploy overlap (two instances briefly).
+// bot.catch doesn't cover the polling loop, so retry instead of crashing.
+function startBotWithRetry(): void {
+  bot
+    .start({ onStart: () => console.log("Bot started.") })
+    .catch((err) => {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`Polling stopped (${msg}). Retrying in 10s…`);
+      setTimeout(startBotWithRetry, 10_000);
+    });
 }
 
 main();
