@@ -20,6 +20,8 @@ export interface State {
   branchId: string;
   serviceId: string;
   active: boolean; // are notifications on?
+  initialized: boolean; // has the baseline been seeded yet?
+  seenDates: string[]; // dates already notified about (persisted across restarts)
 }
 
 function load(): State {
@@ -28,6 +30,8 @@ function load(): State {
     branchId: config.branchId,
     serviceId: config.serviceId,
     active: true,
+    initialized: false,
+    seenDates: [],
   };
   try {
     if (!existsSync(FILE)) return defaults;
@@ -75,10 +79,28 @@ export function setActive(active: boolean): void {
 
 export function setBranch(id: string): void {
   state.branchId = id;
-  persist();
+  resetBaseline();
 }
 
 export function setService(id: string): void {
   state.serviceId = id;
+  resetBaseline();
+}
+
+export function getSeen(): Set<string> {
+  return new Set(state.seenDates);
+}
+
+/** Record the dates currently available; marks baseline as seeded. */
+export function markSeen(dates: string[]): void {
+  state.seenDates = dates;
+  state.initialized = true;
+  persist();
+}
+
+/** Forget what we've seen so the next poll re-seeds silently (e.g. after a target change). */
+export function resetBaseline(): void {
+  state.initialized = false;
+  state.seenDates = [];
   persist();
 }

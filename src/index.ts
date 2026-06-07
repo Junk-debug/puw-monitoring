@@ -8,13 +8,17 @@ import {
   setActive,
   setBranch,
   setService,
+  getSeen,
+  markSeen,
 } from "./state.js";
 
 const bot = new Bot(config.botToken);
 
-// Last set of dates we already told the owner about — so we don't spam the same ones.
-// null = "reseed baseline on next poll without notifying" (startup or after config change).
-let baseline: Set<string> | null = null;
+// Never let a single failed API call crash the whole process.
+bot.catch((err) => {
+  const e = err.error;
+  console.error("Bot error:", e instanceof Error ? e.message : e);
+});
 
 const BOOKING_URL = `${config.base}/#/`;
 const ID_RE = /^[0-9a-fA-F]{64}$/;
@@ -48,19 +52,20 @@ async function poll(): Promise<void> {
     return;
   }
 
-  const current = new Set(slots.map((s) => s.date));
+  const current = slots.map((s) => s.date);
+  const st = getState();
 
-  // First poll, or right after a branch/service change — just record, don't notify.
-  if (baseline === null) {
-    baseline = current;
-    console.log(`Baseline set: ${current.size} date(s).`);
+  // First poll ever (or right after a branch/service change) — record silently, don't notify.
+  if (!st.initialized) {
+    markSeen(current);
+    console.log(`Baseline seeded: ${current.length} date(s).`);
     return;
   }
 
-  const fresh = [...current].filter((d) => !baseline!.has(d));
-  baseline = current;
+  const seen = getSeen();
+  const fresh = current.filter((d) => !seen.has(d));
+  markSeen(current);
 
-  const st = getState();
   if (fresh.length > 0 && st.active && st.ownerId !== null) {
     const freshSlots = slots.filter((s) => fresh.includes(s.date));
     console.log(`New dates: ${fresh.join(", ")}`);
@@ -68,7 +73,7 @@ async function poll(): Promise<void> {
       `🟢 *Pojawiły się wolne terminy!*\n\n${formatSlots(freshSlots)}\n\n👉 [Rezerwuj](${BOOKING_URL})`,
     );
   } else {
-    console.log(`Poll OK — ${current.size} date(s), nothing new.`);
+    console.log(`Poll OK — ${current.length} date(s), nothing new.`);
   }
 }
 
@@ -135,9 +140,8 @@ bot.command("setbranch", async (ctx) => {
     await ctx.reply("❌ Podaj 64-znakowy ID (hex).\nPrzykład: /setbranch 1cf1e3e6…");
     return;
   }
-  setBranch(id);
-  baseline = null; // reseed: nowy oddział = inne terminy
-  await ctx.reply(`✅ BRANCH_ID ustawiony na:\n\`${id}\``, { parse_mode: "Markdown" });
+  setBranch(id); // resets baseline internally
+  await ctx.reply(`✅ Branch ID ustawiony na:\n\`${id}\``, { parse_mode: "Markdown" });
 });
 
 bot.command("setservice", async (ctx) => {
@@ -146,9 +150,8 @@ bot.command("setservice", async (ctx) => {
     await ctx.reply("❌ Podaj 64-znakowy ID (hex).\nPrzykład: /setservice 2c5251d5…");
     return;
   }
-  setService(id);
-  baseline = null; // reseed
-  await ctx.reply(`✅ SERVICE_ID ustawiony na:\n\`${id}\``, { parse_mode: "Markdown" });
+  setService(id); // resets baseline internally
+  await ctx.reply(`✅ Service ID ustawiony na:\n\`${id}\``, { parse_mode: "Markdown" });
 });
 
 bot.command("check", async (ctx) => {
