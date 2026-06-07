@@ -1,7 +1,19 @@
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { config } from "./config.js";
 
-const FILE = new URL("../state.json", import.meta.url);
+const FILE = config.stateDir
+  ? join(config.stateDir, "state.json")
+  : fileURLToPath(new URL("../state.json", import.meta.url));
+
+if (config.stateDir) {
+  try {
+    mkdirSync(config.stateDir, { recursive: true });
+  } catch {
+    /* dir may already exist */
+  }
+}
 
 export interface State {
   ownerId: number | null; // who controls and receives notifications
