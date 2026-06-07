@@ -104,3 +104,13 @@ export function resetBaseline(): void {
   state.seenDates = [];
   persist();
 }
+
+/** Reset everything to defaults. Keeps ownerId so the bot stays claimed. */
+export function resetAll(): void {
+  state.branchId = config.branchId;
+  state.serviceId = config.serviceId;
+  state.active = true;
+  state.initialized = false;
+  state.seenDates = [];
+  persist();
+}

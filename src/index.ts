@@ -8,6 +8,7 @@ import {
   setActive,
   setBranch,
   setService,
+  resetAll,
   getSeen,
   markSeen,
 } from "./state.js";
@@ -100,11 +101,11 @@ bot.command("start", async (ctx) => {
   if (claimed) {
     await ctx.reply(
       "✅ Jesteś teraz właścicielem tego bota. Powiadomię Cię o wolnych terminach.\n\n" +
-        "Komendy: /status /check /config /setbranch /setservice /stop",
+        "Komendy: /status /check /config /setbranch /setservice /reset /stop",
     );
   } else if (isOwner(ctx.chat.id)) {
     setActive(true);
-    await ctx.reply("✅ Powiadomienia włączone.\n\nKomendy: /status /check /config /setbranch /setservice /stop");
+    await ctx.reply("✅ Powiadomienia włączone.\n\nKomendy: /status /check /config /setbranch /setservice /reset /stop");
   }
 });
 
@@ -152,6 +153,17 @@ bot.command("setservice", async (ctx) => {
   }
   setService(id); // resets baseline internally
   await ctx.reply(`✅ Service ID ustawiony na:\n\`${id}\``, { parse_mode: "Markdown" });
+});
+
+bot.command("reset", async (ctx) => {
+  resetAll();
+  const st = getState();
+  await ctx.reply(
+    "♻️ Stan zresetowany do domyślnych.\n\n" +
+      `Branch: …${st.branchId.slice(-8)}\n` +
+      `Service: …${st.serviceId.slice(-8)}\n` +
+      "Powiadomienia: włączone ✅",
+  );
 });
 
 bot.command("check", async (ctx) => {
