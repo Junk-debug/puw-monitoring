@@ -122,9 +122,9 @@ bot.command("config", async (ctx) => {
   const st = getState();
   await ctx.reply(
     `*Aktualna konfiguracja:*\n\n` +
-      `BRANCH_ID:\n\`${st.branchId}\`\n\n` +
-      `SERVICE_ID:\n\`${st.serviceId}\`\n\n` +
-      `Zmień: /setbranch <id> lub /setservice <id>`,
+      `Branch ID:\n\`${st.branchId}\`\n\n` +
+      `Service ID:\n\`${st.serviceId}\`\n\n` +
+      `Zmień: /setbranch lub /setservice`,
     { parse_mode: "Markdown" },
   );
 });
