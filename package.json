@@ -1,0 +1,21 @@
+{
+  "name": "puw-terminy-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot that watches the Gdańsk PUW (Qmatic) booking system for free appointment slots",
+  "type": "module",
+  "scripts": {
+    "dev": "NODE_EXTRA_CA_CERTS=./certs/certum-dv-tls-g2-r39.pem tsx watch src/index.ts",
+    "start": "NODE_EXTRA_CA_CERTS=./certs/certum-dv-tls-g2-r39.pem tsx src/index.ts",
+    "build": "tsc",
+    "serve": "NODE_EXTRA_CA_CERTS=./certs/certum-dv-tls-g2-r39.pem node dist/index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "grammy": "^1.30.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.42",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0"
+  }
+}
